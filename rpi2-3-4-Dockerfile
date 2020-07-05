@@ -1,0 +1,4 @@
+FROM scratch
+ADD openwrt-bcm27xx-bcm2709-rpi-2-rootfs.tar.gz /
+USER root
+CMD /sbin/init

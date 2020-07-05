@@ -1,0 +1,4 @@
+FROM scratch
+ADD openwrt-armvirt-64-default-rootfs.tar.gz /
+USER root
+CMD /sbin/init

@@ -1,0 +1,132 @@
+#
+# This is free software, lisence use MIT.
+# 
+
+####需要设置secrets.ALIDOCKER_KEY####
+####阿里云镜像仓库-->访问权限-->固定密码####
+
+name: OpenWrt-CI-ALL_IN_ONE
+
+on:
+  push:
+    branches: 
+      - master
+    paths-ignore:
+      - "*.md"
+  schedule:
+    - cron: 30 18 * * 0/3
+
+env:
+  DOCKER_REGISTRY_USERNAME: muyeyifeng@163.com	#email
+  DOCKER_REGISTRY_HOST: registry.cn-beijing.aliyuncs.com
+  DOCKER_REGISTRY_URL: registry.cn-beijing.aliyuncs.com/muyeyifeng/
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        db-backend: [rpi2-3-4, rpi364, aarch64,x64]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+        with:
+          ref: master
+          fetch-depth: 1000000
+
+      - name: Clone source code
+        run:  |
+          git clone  https://github.com/coolsnowwolf/lede
+          str="$(tail -n 1 lede/feeds.conf.default)" &&echo ${str#*#}>>lede/feeds.conf.default
+
+      - name: Space cleanup
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          echo  $DOCKER_REGISTRY_URL"lede-"${{ matrix.db-backend }}:latest
+          docker rmi `docker images -q`
+          sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
+          sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
+          sudo -E apt-get update
+          #=========================
+          echo "$(cat lede/README.md |grep 'sudo apt-get' | sed -n 2p)"
+          $(cat lede/README.md |grep "sudo apt-get" | sed -n 2p)
+          sudo -E apt-get -y install tree
+          sudo -E apt-get -y autoremove --purge
+          sudo -E apt-get clean
+          df -h
+
+      - name: Update feeds
+        run: |
+          echo "======================="
+          echo "Lede"
+          echo "======================="
+          ls lede
+          echo "======================="
+          cd lede
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+#      - name: Add important app
+#        run: |
+#          git clone https://github.com/fw876/helloworld
+#          mv helloworld/luci-app-ssr-plus lede/package/lean
+
+      - name: Generate configuration file
+        run: |
+          cp ${{ matrix.db-backend }}.defconfig lede/defconfig
+          cd lede
+          ls
+          cat defconfig > .config
+          make defconfig
+          cat .config
+
+      - name: Make download
+        run: |
+          ls
+          cd lede
+          make download -j8
+          find dl -size -1024c -exec rm -f {} \;
+
+      - name: Compile firmware
+        run: |
+          ls
+          cd lede
+          make -j$(nproc) || make -j1 V=s
+          echo "======================="
+          echo "Space usage:"
+          echo "======================="
+          df -h
+          echo "======================="
+          du -h --max-depth=1 ./ --exclude=build_dir --exclude=bin
+          du -h --max-depth=1 ./build_dir
+          du -h --max-depth=1 ./bin
+
+      - name: Build DockerImage
+        run: |
+          mkdir docker-build
+          echo "======================="
+          path=$(find -type f -name "*rootfs.tar.gz")
+          echo $path
+          echo "====================s==="
+          mv $path docker-build/
+          cp  ${{ matrix.db-backend }}-Dockerfile docker-build/Dockerfile
+          cd docker-build
+          docker build -f ./Dockerfile -t lede-${{ matrix.db-backend }}:latest .
+
+      - name: Push DockerImage
+        run: |
+         sudo docker login --username=$DOCKER_REGISTRY_USERNAME --password=${{ secrets.ALIDOCKER_KEY }}  $DOCKER_REGISTRY_HOST
+         echo "============================="
+         sudo docker images
+         echo "============================="
+         ImageId=$(sudo docker images | grep "lede" | awk '{print $3}')
+         echo "============================="
+         echo $ImageId
+         echo "============================="
+         sudo docker tag $ImageId $DOCKER_REGISTRY_URL"lede-"${{ matrix.db-backend }}:latest
+         sudo docker push $DOCKER_REGISTRY_URL"lede-"${{ matrix.db-backend }}:latest
