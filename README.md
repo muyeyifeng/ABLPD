@@ -120,11 +120,11 @@ image ID：docker images获取本地镜像
 
 
 
-REPOSITORY********************************TAG******************IMAGE ID	************CREATED************SIZE
+REPOSITORY---------------------------------TAG-----------IMAGE ID-----------------CREATED-----------------SIZE
 
 
 
-docker.io/muyeyifeng/rpi2-lede************latest****************0077368fb938********36 minutes ago******288 MB
+docker.io/muyeyifeng/rpi2-lede-----------latest-----------0077368fb938-----------36 minutes ago-----------288 MB
 
 
 
