@@ -118,6 +118,8 @@ jobs:
          echo "============================="
          echo $ImageId
          echo "============================="
+         sudo docker tag $ImageId $DOCKER_REGISTRY_URL"lede-"${{ matrix.db-backend }}:latest
+         sudo docker push $DOCKER_REGISTRY_URL"lede-"${{ matrix.db-backend }}:latest
          tag=$(date +%Y%m%d%H%M%S)
          sudo docker tag $ImageId $DOCKER_REGISTRY_URL"lede-"${{ matrix.db-backend }}:$tag
          sudo docker push $DOCKER_REGISTRY_URL"lede-"${{ matrix.db-backend }}:$tag
