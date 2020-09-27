@@ -110,7 +110,7 @@ jobs:
           cd docker-build
           cat << EOF >Dockerfile
           FROM scratch
-          ADD $path /
+          ADD $name /
           USER root
           CMD /sbin/init
           EOF
