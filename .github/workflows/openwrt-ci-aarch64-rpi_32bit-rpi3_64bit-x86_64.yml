@@ -41,6 +41,7 @@ jobs:
       - name: Clone source code
         run:  |
           git clone  https://github.com/coolsnowwolf/lede
+          git clone  https://github.com/muyeyifeng/Actions-Build-Lede-Public
 
       - name: Space cleanup
         env:
@@ -61,14 +62,14 @@ jobs:
 
       - name: Update feeds
         run: |
-          mv ./feeds.conf.default ./lede/feeds.conf.default
+          mv ./Actions-Build-Lede-Public/feeds.conf.default ./lede/feeds.conf.default
           cd lede
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
       - name: Generate configuration file
         run: |
-          cp ${{ matrix.db-backend }}.defconfig lede/defconfig
+          cp ./Actions-Build-Lede-Public/${{ matrix.db-backend }}.defconfig lede/defconfig
           cd lede
           ls
           cat defconfig > .config
@@ -102,10 +103,17 @@ jobs:
           echo "======================="
           path=$(find -type f -name "*rootfs.tar.gz")
           echo $path
-          echo "====================s==="
+          echo "======================="
           mv $path docker-build/
-          cp  ${{ matrix.db-backend }}-Dockerfile docker-build/Dockerfile
+#          cp  ${{ matrix.db-backend }}-Dockerfile docker-build/Dockerfile
           cd docker-build
+          cat << EOF >Dockerfile
+FROM scratch
+ADD $path /
+USER root
+CMD /sbin/init
+EOF
+          cat Dockerfile
           docker build -f ./Dockerfile -t lede-${{ matrix.db-backend }}:$(date +%Y%m%d%H%M%S) .
 
       - name: Push DockerImage
