@@ -101,7 +101,8 @@ jobs:
         run: |
           mkdir docker-build
           echo "======================="
-          path=$(find -type f -name "*rootfs.tar.gz")
+          path=$( find -type f -name "*rootfs.tar.gz" )
+          name=$( find -type f -name "*rootfs.tar.gz" |sed 's#.*/##' )
           echo $path
           echo "======================="
           mv $path docker-build/
