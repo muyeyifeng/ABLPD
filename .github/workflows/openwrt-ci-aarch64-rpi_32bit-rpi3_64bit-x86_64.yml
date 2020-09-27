@@ -105,14 +105,14 @@ jobs:
           echo $path
           echo "======================="
           mv $path docker-build/
-#          cp  ${{ matrix.db-backend }}-Dockerfile docker-build/Dockerfile
+          #cp  ${{ matrix.db-backend }}-Dockerfile docker-build/Dockerfile
           cd docker-build
           cat << EOF >Dockerfile
-FROM scratch
-ADD $path /
-USER root
-CMD /sbin/init
-EOF
+          FROM scratch
+          ADD $path /
+          USER root
+          CMD /sbin/init
+          EOF
           cat Dockerfile
           docker build -f ./Dockerfile -t lede-${{ matrix.db-backend }}:$(date +%Y%m%d%H%M%S) .
 
