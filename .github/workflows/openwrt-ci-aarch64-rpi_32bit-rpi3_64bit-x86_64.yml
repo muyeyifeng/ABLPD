@@ -17,6 +17,7 @@ on:
     - cron: 30 18 * * 0/3
 
 env:
+  action_state: run
   DOCKER_REGISTRY_USERNAME: muyeyifeng@163.com	#email
   DOCKER_REGISTRY_HOST: registry.cn-beijing.aliyuncs.com
   DOCKER_REGISTRY_URL: registry.cn-beijing.aliyuncs.com/muyeyifeng/
@@ -42,6 +43,22 @@ jobs:
         run:  |
           git clone  https://github.com/coolsnowwolf/lede
           git clone  https://github.com/muyeyifeng/Actions-Build-Lede-Public
+
+      - name: Show Last md5
+        run:  |
+          cat md5 | tail -n 1 |awk '{print $1}'
+
+      - name: Check MD5
+        run:  |
+          cd lede
+          git log -1 --format=%cd
+          echo -n "$(git log -1 --format=%cd)" |md5sum
+          echo -n "$(git log -1 --format=%cd)" |md5sum > tmpmd5
+          if [[ "$(cat ../md5 | tail -n 1 |awk '{print $1}')" == "$(cat tmpmd5| tail -n 1 |awk '{print $1}')" ]]; then
+                  echo "action_state=cancel" >> $GITHUB_ENV;
+          else
+                  echo -n "$(git log -1 --format=%cd)" |md5sum >> ../md5;
+          fi
 
       - name: Space cleanup
         env:
@@ -132,3 +149,30 @@ jobs:
          tag=$(date +%Y%m%d%H%M%S)
          sudo docker tag $ImageId $DOCKER_REGISTRY_URL"lede-"${{ matrix.db-backend }}:$tag
          sudo docker push $DOCKER_REGISTRY_URL"lede-"${{ matrix.db-backend }}:$tag
+
+      - name: Push this source
+        if: env.action_state == 'run' &&  matrix.db-backend == 'rpi2-3-4'
+        run: |
+          rm -rf lede Actions-Build-Lede-Public
+          echo "${{ secrets.GHB_KEY }}" >github.pem
+          eval `ssh-agent`
+          chmod 600 github.pem
+          ssh-add github.pem
+          mkdir -p ~/.ssh/
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          
+          ls
+          echo "============ git config ============"
+          git config --global user.email ${GITHUB_EMAIL}
+          git config --global user.name ${GITHUB_USER}
+          echo "============ git commit ============"
+          rm -rf github.pem
+          if( ${{ github.event_name == 'push' }} );then
+            git add -f .
+            git commit --no-verify -m "Update md5" 
+          else
+            git add .
+            git commit -m "Update md5" 
+          fi
+          echo "============ git push ============"
+          git push
