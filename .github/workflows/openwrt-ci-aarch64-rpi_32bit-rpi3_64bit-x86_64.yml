@@ -18,6 +18,8 @@ on:
 
 env:
   action_state: run
+  GITHUB_EMAIL: muyeyifeng@gmail.com	#email
+  GITHUB_USER: muyeyifeng
   DOCKER_REGISTRY_USERNAME: muyeyifeng@163.com	#email
   DOCKER_REGISTRY_HOST: registry.cn-beijing.aliyuncs.com
   DOCKER_REGISTRY_URL: registry.cn-beijing.aliyuncs.com/muyeyifeng/
