@@ -1,14 +1,14 @@
 阿里云镜像地址：
->>
-registry.cn-beijing.aliyuncs.com/muyeyifeng/lede-x64
 
-registry.cn-beijing.aliyuncs.com/muyeyifeng/lede-rpi364
+    registry.cn-beijing.aliyuncs.com/muyeyifeng/lede-x64
 
-registry.cn-beijing.aliyuncs.com/muyeyifeng/lede-rpi2-3-4
+    registry.cn-beijing.aliyuncs.com/muyeyifeng/lede-rpi364
 
-registry.cn-beijing.aliyuncs.com/muyeyifeng/lede-aarch64
+    registry.cn-beijing.aliyuncs.com/muyeyifeng/lede-rpi2-3-4
 
-registry.cn-beijing.aliyuncs.com/muyeyifeng/lede-rpi464
+    registry.cn-beijing.aliyuncs.com/muyeyifeng/lede-aarch64
+
+    registry.cn-beijing.aliyuncs.com/muyeyifeng/lede-rpi464
 
 
 !!!!!!!!!
