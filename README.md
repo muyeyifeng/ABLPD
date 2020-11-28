@@ -1,9 +1,15 @@
 阿里云镜像地址：
+>>
 registry.cn-beijing.aliyuncs.com/muyeyifeng/lede-x64
+
 registry.cn-beijing.aliyuncs.com/muyeyifeng/lede-rpi364
+
 registry.cn-beijing.aliyuncs.com/muyeyifeng/lede-rpi2-3-4
+
 registry.cn-beijing.aliyuncs.com/muyeyifeng/lede-aarch64
+
 registry.cn-beijing.aliyuncs.com/muyeyifeng/lede-rpi464
+
 
 !!!!!!!!!
 初步判断Actions环境中路径名过长导致编译失败，项目代码已转移至https://github.com/muyeyifeng/ABLPD
