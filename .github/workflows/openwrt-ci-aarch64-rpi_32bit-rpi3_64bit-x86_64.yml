@@ -32,7 +32,7 @@ jobs:
 
     strategy:
       matrix:
-        db-backend: [rpi2-3-4, rpi364, aarch64,x64]
+        db-backend: [rpi2-3-4, rpi364, rpi464, aarch64, x64]
 
     steps:
       - name: Checkout
@@ -63,7 +63,7 @@ jobs:
           fi
 
       - name: Space cleanup
-        if: env.action_state == 'run'
+        if: env.action_state == 'run' || ${{ github.event_name }}=='push'
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
@@ -81,7 +81,7 @@ jobs:
           df -h
 
       - name: Update feeds
-        if: env.action_state == 'run'
+        if: env.action_state == 'run' || ${{ github.event_name }}=='push'
         run: |
           mv ./Actions-Build-Lede-Public/feeds.conf.default ./lede/feeds.conf.default
           cd lede
@@ -89,7 +89,7 @@ jobs:
           ./scripts/feeds install -a
 
       - name: Generate configuration file
-        if: env.action_state == 'run'
+        if: env.action_state == 'run' || ${{ github.event_name }}=='push'
         run: |
           cp ./Actions-Build-Lede-Public/${{ matrix.db-backend }}.defconfig lede/defconfig
           cd lede
@@ -99,7 +99,7 @@ jobs:
           cat .config
 
       - name: Make download
-        if: env.action_state == 'run'
+        if: env.action_state == 'run' || ${{ github.event_name }}=='push'
         run: |
           ls
           cd lede
@@ -107,7 +107,7 @@ jobs:
           find dl -size -1024c -exec rm -f {} \;
 
       - name: Compile firmware
-        if: env.action_state == 'run'
+        if: env.action_state == 'run' || ${{ github.event_name }}=='push'
         run: |
           ls
           cd lede
@@ -122,7 +122,7 @@ jobs:
           du -h --max-depth=1 ./bin
 
       - name: Build DockerImage
-        if: env.action_state == 'run'
+        if: env.action_state == 'run' || ${{ github.event_name }}=='push'
         run: |
           mkdir docker-build
           echo "======================="
@@ -143,7 +143,7 @@ jobs:
           docker build -f ./Dockerfile -t lede-${{ matrix.db-backend }}:$(date +%Y%m%d%H%M%S) .
 
       - name: Push DockerImage
-        if: env.action_state == 'run'
+        if: env.action_state == 'run' || ${{ github.event_name }}=='push'
         run: |
          sudo docker login --username=$DOCKER_REGISTRY_USERNAME --password=${{ secrets.ALIDOCKER_KEY }}  $DOCKER_REGISTRY_HOST
          echo "============================="
