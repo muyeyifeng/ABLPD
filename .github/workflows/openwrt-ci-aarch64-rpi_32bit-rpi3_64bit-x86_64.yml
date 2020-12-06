@@ -62,6 +62,9 @@ jobs:
                   echo -n "$(git log -1 --format=%cd)" |md5sum >> ../md5;
           fi
 
+      - name: Check env
+        run: echo ${action_state}
+
       - name: Space cleanup
         if: env.action_state == 'run' || ${{ github.event_name }}=='push'
         env:
